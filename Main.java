@@ -153,7 +153,8 @@ public class Main {
           }
 
         }
-        classeEscolhida = votoMajoritorio(instanciasProximas);
+        classeEscolhida = escolherModoVoto(instanciasProximas);
+
         instanciasProximas.clear();
 
         if (classeEscolhida.equals(conjuntoValidacao.get(i).classe)) {
@@ -168,6 +169,14 @@ public class Main {
     }
 
     return melhorK;
+  }
+
+  private static String escolherModoVoto(List<InstanciaProxima> instanciasProximas) {
+    String classeEscolhida = "";
+    // classeEscolhida = votoMajoritorio(instanciasProximas);
+    classeEscolhida = votoPonderadoInverso(instanciasProximas);
+
+    return classeEscolhida;
   }
 
   private static String votoMajoritorio(List<InstanciaProxima> instanciasProximas) {
@@ -185,6 +194,23 @@ public class Main {
       return "b";
     }
     return "g";
+  }
+
+  private static String votoPonderadoInverso(List<InstanciaProxima> instanciasProximas) {
+    double votosParaB = 0, votosParaG = 0;
+    for (int i = 0; i < instanciasProximas.size(); i++) {
+      if (instanciasProximas.get(i).classe.equals("b")) {
+        votosParaB += 1 / instanciasProximas.get(i).distancia;
+      } else {
+        votosParaG += 1 / instanciasProximas.get(i).distancia;
+      }
+    }
+
+    if (votosParaB > votosParaG) {
+      return "b";
+    }
+    return "g";
+
   }
 
   private static double avaliarClassificador(List<Amostra> conjuntoTreino, List<Amostra> conjuntoTeste, int melhorK) {
