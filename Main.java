@@ -85,6 +85,82 @@ public class Main {
   private static void separarConjuntos(List<Amostra> amostrasClasseG, List<Amostra> amostrasClasseB,
       List<Amostra> conjuntoTreino, List<Amostra> conjuntoValidacao, List<Amostra> conjuntoTeste) {
 
+    separarClasseG(amostrasClasseG, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
+
+    separarClasseB(amostrasClasseB, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
+
+    System.out.println("Tamanho do conjunto de Treino: " + conjuntoTreino.size());
+    System.out.println("Tamanho do conjunto de Validacao: " + conjuntoValidacao.size());
+    System.out.println("Tamanho do conjunto de Teste: " + conjuntoTeste.size());
+
+  }
+
+  private static void separarClasseG(List<Amostra> amostrasClasseG, List<Amostra> conjuntoTreino,
+      List<Amostra> conjuntoValidacao, List<Amostra> conjuntoTeste) {
+    final int METADE_CLASSE_G = amostrasClasseG.size() / 2;
+    final int UM_QUARTO_CLASSE_G = amostrasClasseG.size() / 4;
+    int limiteMaior;
+    int limiteMenor = 0;
+    int numAleatorio;
+
+    for (int i = 0; i < METADE_CLASSE_G; i++) {
+      limiteMaior = amostrasClasseG.size() - 1;
+      numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
+      Amostra amostraEscolhida = amostrasClasseG.get(numAleatorio);
+      conjuntoTreino.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
+      amostrasClasseG.remove(numAleatorio);
+    }
+
+    for (int i = 0; i < UM_QUARTO_CLASSE_G; i++) {
+      limiteMaior = amostrasClasseG.size() - 1;
+      numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
+      Amostra amostraEscolhida = amostrasClasseG.get(numAleatorio);
+      conjuntoValidacao.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
+      amostrasClasseG.remove(numAleatorio);
+    }
+
+    final int RESTANTE = amostrasClasseG.size();
+
+    for (int i = 0; i < RESTANTE; i++) {
+      Amostra amostraEscolhida = amostrasClasseG.get(i);
+      conjuntoTeste.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
+    }
+
+    amostrasClasseG.clear();
+  }
+
+  private static void separarClasseB(List<Amostra> amostrasClasseB, List<Amostra> conjuntoTreino,
+      List<Amostra> conjuntoValidacao, List<Amostra> conjuntoTeste) {
+    final int METADE_CLASSE_B = amostrasClasseB.size() / 2;
+    final int UM_QUARTO_CLASSE_B = amostrasClasseB.size() / 4;
+    int limiteMaior;
+    int limiteMenor = 0;
+    int numAleatorio;
+
+    for (int i = 0; i < METADE_CLASSE_B; i++) {
+      limiteMaior = amostrasClasseB.size() - 1;
+      numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
+      Amostra amostraEscolhida = amostrasClasseB.get(numAleatorio);
+      conjuntoTreino.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
+      amostrasClasseB.remove(numAleatorio);
+    }
+
+    for (int i = 0; i < UM_QUARTO_CLASSE_B; i++) {
+      limiteMaior = amostrasClasseB.size() - 1;
+      numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
+      Amostra amostraEscolhida = amostrasClasseB.get(numAleatorio);
+      conjuntoValidacao.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
+      amostrasClasseB.remove(numAleatorio);
+    }
+
+    final int RESTANTE = amostrasClasseB.size();
+
+    for (int i = 0; i < RESTANTE; i++) {
+      Amostra amostraEscolhida = amostrasClasseB.get(i);
+      conjuntoTeste.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
+    }
+
+    amostrasClasseB.clear();
   }
 
 }
