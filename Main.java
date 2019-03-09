@@ -10,6 +10,7 @@ public class Main {
   public static void main(String[] args) {
     final String FILE_PATH = "/home/marco/Desktop/personal_files/Faculdade/4_ano/aprendizado_maquina/trabalho_1/Ionosphere_Marco.csv";
     final int NUM_TESTES = 10;
+    double performanceClassificador = 0;
 
     List<List<String>> conteudoDB = new ArrayList<>();
 
@@ -22,28 +23,21 @@ public class Main {
     List<Amostra> amostrasClasseG = new LinkedList<>();
     List<Amostra> amostrasClasseB = new LinkedList<>();
 
-    Amostra.separarPorClasse(amostras, amostrasClasseG, amostrasClasseB);
+    for (int i = 0; i < NUM_TESTES; i++) {
+      Amostra.separarPorClasse(amostras, amostrasClasseG, amostrasClasseB);
 
-    // System.out.println("Numero de amostras de classe g: " +
-    // amostrasClasseG.size());
-    // System.out.println("Numero de amostras de classe b: " +
-    // amostrasClasseB.size());
+      List<Amostra> conjuntoTreino = new LinkedList<>();
+      List<Amostra> conjuntoValidacao = new LinkedList<>();
+      List<Amostra> conjuntoTeste = new LinkedList<>();
 
-    List<Amostra> conjuntoTreino = new LinkedList<>();
-    List<Amostra> conjuntoValidacao = new LinkedList<>();
-    List<Amostra> conjuntoTeste = new LinkedList<>();
+      separarConjuntos(amostrasClasseG, amostrasClasseB, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
 
-    separarConjuntos(amostrasClasseG, amostrasClasseB, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
+      int melhorK = definirMelhorK(conjuntoTreino, conjuntoValidacao);
 
-    // System.out.println("Tamanho do conjunto de Treino: " +
-    // conjuntoTreino.size());
-    // System.out.println("Tamanho do conjunto de Validacao: " +
-    // conjuntoValidacao.size());
-    // System.out.println("Tamanho do conjunto de Teste: " + conjuntoTeste.size());
+      performanceClassificador += avaliarClassificador(conjuntoTreino, conjuntoTeste, melhorK);
+    }
 
-    int melhorK = definirMelhorK(conjuntoTreino, conjuntoValidacao);
-
-    System.out.println("O melhor K eh: " + melhorK);
+    System.out.println("Performance media do classificador: " + performanceClassificador / 10);
 
   }
 
@@ -124,7 +118,7 @@ public class Main {
       amostrasClasse.remove(numAleatorio);
     }
 
-    final int RESTANTE = amostrasClasseG.size();
+    final int RESTANTE = amostrasClasse.size();
 
     for (int i = 0; i < RESTANTE; i++) {
       Amostra amostraEscolhida = amostrasClasse.get(i);
@@ -141,7 +135,6 @@ public class Main {
     String classeEscolhida = "";
 
     for (int kAtual = 1; kAtual <= 19; kAtual += 2) {
-      System.out.println("K atual eh: " + kAtual);
       for (int i = 0; i < conjuntoValidacao.size(); i++) {
         for (int j = 0; j < conjuntoTreino.size(); j++) {
           distancia = Amostra.calcularDistanciaEuclidiana(conjuntoValidacao.get(i), conjuntoTreino.get(j));
@@ -162,14 +155,11 @@ public class Main {
         }
         classeEscolhida = votoMajoritorio(instanciasProximas);
         instanciasProximas.clear();
-        // System.out.println("Classe escolhida: " + classeEscolhida);
-        // System.out.println("Classe esperada: " + conjuntoValidacao.get(i).classe);
+
         if (classeEscolhida.equals(conjuntoValidacao.get(i).classe)) {
           eficienciaK++;
         }
       }
-      System.out.println("eficiencia K: " + eficienciaK);
-      System.out.println();
       if (eficienciaK > melhorEficienciaK) {
         melhorEficienciaK = eficienciaK;
         melhorK = kAtual;
@@ -180,7 +170,7 @@ public class Main {
     return melhorK;
   }
 
-  public static String votoMajoritorio(List<InstanciaProxima> instanciasProximas) {
+  private static String votoMajoritorio(List<InstanciaProxima> instanciasProximas) {
     int votosParaG = 0, votosParaB = 0;
 
     for (int i = 0; i < instanciasProximas.size(); i++) {
@@ -190,8 +180,6 @@ public class Main {
         votosParaG++;
       }
     }
-    // System.out.println("votos para b: " + votosParaB);
-    // System.out.println("votos para g: " + votosParaG);
 
     if (votosParaB > votosParaG) {
       return "b";
@@ -199,4 +187,43 @@ public class Main {
     return "g";
   }
 
+  private static double avaliarClassificador(List<Amostra> conjuntoTreino, List<Amostra> conjuntoTeste, int melhorK) {
+    double distancia;
+    List<InstanciaProxima> instanciasProximas = new LinkedList<>();
+    String classeEscolhida = "";
+    int numAcertos = 0;
+    double eficienciaClassificador = 0;
+
+    for (int i = 0; i < conjuntoTeste.size(); i++) {
+      for (int j = 0; j < conjuntoTreino.size(); j++) {
+        distancia = Amostra.calcularDistanciaEuclidiana(conjuntoTeste.get(i), conjuntoTreino.get(j));
+
+        if (instanciasProximas.size() < melhorK) {
+          instanciasProximas.add(new InstanciaProxima(distancia, conjuntoTreino.get(j).classe));
+          Collections.sort(instanciasProximas);
+        } else {
+          // se a distancia da instancia armazenada mais distante for maior que a
+          // distancia ate instancia sendo avaliada
+          if (instanciasProximas.get(0).distancia > distancia) {
+            instanciasProximas.remove(0);
+            instanciasProximas.add(new InstanciaProxima(distancia, conjuntoTreino.get(j).classe));
+            Collections.sort(instanciasProximas);
+          }
+        }
+
+      }
+      classeEscolhida = votoMajoritorio(instanciasProximas);
+      instanciasProximas.clear();
+      if (classeEscolhida.equals(conjuntoTeste.get(i).classe)) {
+        numAcertos++;
+      }
+    }
+    System.out.println("numero de acertos: " + numAcertos);
+    System.out.println("tamanho do conjunto teste: " + conjuntoTeste.size());
+
+    eficienciaClassificador = (numAcertos / (double) conjuntoTeste.size()) * 100;
+
+    System.out.println("retornando eficiencia do classificador: " + eficienciaClassificador);
+    return eficienciaClassificador;
+  }
 }
