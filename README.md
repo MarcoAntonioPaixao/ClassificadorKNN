@@ -7,15 +7,14 @@ Este projeto é uma implementação do classificador KNN em Java.
 No diretório root do projeto use o seguinte comando no terminal:
 
 ```bash
-  mkdir build
-  javac -d ./build *.java
+  javac *.java
 ```
 
-Isso irá compilar seu código e gravar os arquivos .class resultantes no diretório build criado.
+Isso irá compilar seu código e gravar os arquivos .class resultantes no diretório raiz do projeto.
 
 ## Para rodar o código
 
-No diretório build usar o comando:
+No diretório raiz do projeto usar o comando:
 
 ```bash
   java Main

@@ -1,5 +1,10 @@
+import java.util.List;
+
 class Amostra {
-  public static String getString() {
-    return "the second class is working properly!!";
+  public List<Double> amostras;
+  public String classe = "";
+
+  public Amostra(List<Double> amostras) {
+    this.amostras = amostras;
   }
 }
