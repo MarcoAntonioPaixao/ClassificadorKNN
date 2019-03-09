@@ -173,8 +173,9 @@ public class Main {
 
   private static String escolherModoVoto(List<InstanciaProxima> instanciasProximas) {
     String classeEscolhida = "";
-    // classeEscolhida = votoMajoritorio(instanciasProximas);
-    classeEscolhida = votoPonderadoInverso(instanciasProximas);
+    classeEscolhida = votoMajoritorio(instanciasProximas);
+    // classeEscolhida = votoPonderadoInverso(instanciasProximas);
+    // classeEscolhida = votoPonderadoNormalizado(instanciasProximas);
 
     return classeEscolhida;
   }
@@ -213,6 +214,27 @@ public class Main {
 
   }
 
+  private static String votoPonderadoNormalizado(List<InstanciaProxima> instanciasProximas) {
+    double votosParaB = 0, votosParaG = 0;
+    final int NUM_INSTANCIAS = instanciasProximas.size();
+    for (int i = 0; i < NUM_INSTANCIAS; i++) {
+      if (instanciasProximas.get(i).classe.equals("b")) {
+        votosParaB += 1 - (instanciasProximas.get(i).distancia
+            - instanciasProximas.get(0).distancia / instanciasProximas.get(NUM_INSTANCIAS - 1).distancia
+            - instanciasProximas.get(0).distancia);
+      } else {
+        votosParaG += 1 - (instanciasProximas.get(i).distancia
+            - instanciasProximas.get(0).distancia / instanciasProximas.get(NUM_INSTANCIAS - 1).distancia
+            - instanciasProximas.get(0).distancia);
+      }
+    }
+
+    if (votosParaB > votosParaG) {
+      return "b";
+    }
+    return "g";
+  }
+
   private static double avaliarClassificador(List<Amostra> conjuntoTreino, List<Amostra> conjuntoTeste, int melhorK) {
     double distancia;
     List<InstanciaProxima> instanciasProximas = new LinkedList<>();
@@ -238,7 +260,7 @@ public class Main {
         }
 
       }
-      classeEscolhida = votoMajoritorio(instanciasProximas);
+      classeEscolhida = escolherModoVoto(instanciasProximas);
       instanciasProximas.clear();
       if (classeEscolhida.equals(conjuntoTeste.get(i).classe)) {
         numAcertos++;
