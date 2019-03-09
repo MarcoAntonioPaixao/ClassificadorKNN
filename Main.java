@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -16,11 +17,21 @@ public class Main {
 
     converterDadosAmostra(amostras, conteudoDB);
 
-    System.out.println("Quantidade de amostras: " + amostras.size());
+    List<Amostra> amostrasClasseG = new LinkedList<>();
+    List<Amostra> amostrasClasseB = new LinkedList<>();
 
-    for (int i = 0; i < amostras.size(); i++) {
-      System.out.println(amostras.get(i).classe);
-    }
+    Amostra.separarPorClasse(amostras, amostrasClasseG, amostrasClasseB);
+
+    // System.out.println("Numero de amostras de classe g: " +
+    // amostrasClasseG.size());
+    // System.out.println("Numero de amostras de classe b: " +
+    // amostrasClasseB.size());
+
+    List<Amostra> conjuntoTreino = new LinkedList<>();
+    List<Amostra> conjuntoValidacao = new LinkedList<>();
+    List<Amostra> conjuntoTeste = new LinkedList<>();
+
+    separarConjuntos(amostrasClasseG, amostrasClasseB, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
 
   }
 
@@ -61,13 +72,18 @@ public class Main {
       for (int j = 0; j < NUM_CAMPOS_AMOSTRA; j++) {
 
         if (j < NUM_CAMPOS_AMOSTRA - 1) {
-          amostraAtual.amostras.add(Double.parseDouble(conteudoDB.get(i).get(j)));
+          amostraAtual.parametros.add(Double.parseDouble(conteudoDB.get(i).get(j)));
         } else {
           amostraAtual.classe = conteudoDB.get(i).get(j);
         }
       }
       amostras.add(amostraAtual);
     }
+
+  }
+
+  private static void separarConjuntos(List<Amostra> amostrasClasseG, List<Amostra> amostrasClasseB,
+      List<Amostra> conjuntoTreino, List<Amostra> conjuntoValidacao, List<Amostra> conjuntoTeste) {
 
   }
 
