@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
@@ -8,6 +9,7 @@ import java.util.Scanner;
 public class Main {
   public static void main(String[] args) {
     final String FILE_PATH = "/home/marco/Desktop/personal_files/Faculdade/4_ano/aprendizado_maquina/trabalho_1/Ionosphere_Marco.csv";
+    final int NUM_TESTES = 10;
 
     List<List<String>> conteudoDB = new ArrayList<>();
 
@@ -32,6 +34,16 @@ public class Main {
     List<Amostra> conjuntoTeste = new LinkedList<>();
 
     separarConjuntos(amostrasClasseG, amostrasClasseB, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
+
+    // System.out.println("Tamanho do conjunto de Treino: " +
+    // conjuntoTreino.size());
+    // System.out.println("Tamanho do conjunto de Validacao: " +
+    // conjuntoValidacao.size());
+    // System.out.println("Tamanho do conjunto de Teste: " + conjuntoTeste.size());
+
+    int melhorK = definirMelhorK(conjuntoTreino, conjuntoValidacao);
+
+    System.out.println("O melhor K eh: " + melhorK);
 
   }
 
@@ -64,9 +76,6 @@ public class Main {
     final int NUM_AMOSTRAS = conteudoDB.size();
     final int NUM_CAMPOS_AMOSTRA = conteudoDB.get(0).size();
 
-    // System.out.println("num de amostras no arquivo: " + NUM_AMOSTRAS);
-    // System.out.println("Num de campos em cada amostra: " + NUM_CAMPOS_AMOSTRA);
-
     for (int i = 1; i < NUM_AMOSTRAS; i++) {
       Amostra amostraAtual = new Amostra(new ArrayList<Double>());
       for (int j = 0; j < NUM_CAMPOS_AMOSTRA; j++) {
@@ -85,82 +94,109 @@ public class Main {
   private static void separarConjuntos(List<Amostra> amostrasClasseG, List<Amostra> amostrasClasseB,
       List<Amostra> conjuntoTreino, List<Amostra> conjuntoValidacao, List<Amostra> conjuntoTeste) {
 
-    separarClasseG(amostrasClasseG, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
+    separarClasse(amostrasClasseG, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
 
-    separarClasseB(amostrasClasseB, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
-
-    System.out.println("Tamanho do conjunto de Treino: " + conjuntoTreino.size());
-    System.out.println("Tamanho do conjunto de Validacao: " + conjuntoValidacao.size());
-    System.out.println("Tamanho do conjunto de Teste: " + conjuntoTeste.size());
+    separarClasse(amostrasClasseB, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
 
   }
 
-  private static void separarClasseG(List<Amostra> amostrasClasseG, List<Amostra> conjuntoTreino,
+  private static void separarClasse(List<Amostra> amostrasClasse, List<Amostra> conjuntoTreino,
       List<Amostra> conjuntoValidacao, List<Amostra> conjuntoTeste) {
-    final int METADE_CLASSE_G = amostrasClasseG.size() / 2;
-    final int UM_QUARTO_CLASSE_G = amostrasClasseG.size() / 4;
+    final int METADE_CLASSE_G = amostrasClasse.size() / 2;
+    final int UM_QUARTO_CLASSE_G = amostrasClasse.size() / 4;
     int limiteMaior;
     int limiteMenor = 0;
     int numAleatorio;
 
     for (int i = 0; i < METADE_CLASSE_G; i++) {
-      limiteMaior = amostrasClasseG.size() - 1;
+      limiteMaior = amostrasClasse.size() - 1;
       numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
-      Amostra amostraEscolhida = amostrasClasseG.get(numAleatorio);
+      Amostra amostraEscolhida = amostrasClasse.get(numAleatorio);
       conjuntoTreino.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
-      amostrasClasseG.remove(numAleatorio);
+      amostrasClasse.remove(numAleatorio);
     }
 
     for (int i = 0; i < UM_QUARTO_CLASSE_G; i++) {
-      limiteMaior = amostrasClasseG.size() - 1;
+      limiteMaior = amostrasClasse.size() - 1;
       numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
-      Amostra amostraEscolhida = amostrasClasseG.get(numAleatorio);
+      Amostra amostraEscolhida = amostrasClasse.get(numAleatorio);
       conjuntoValidacao.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
-      amostrasClasseG.remove(numAleatorio);
+      amostrasClasse.remove(numAleatorio);
     }
 
     final int RESTANTE = amostrasClasseG.size();
 
     for (int i = 0; i < RESTANTE; i++) {
-      Amostra amostraEscolhida = amostrasClasseG.get(i);
+      Amostra amostraEscolhida = amostrasClasse.get(i);
       conjuntoTeste.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
     }
 
-    amostrasClasseG.clear();
+    amostrasClasse.clear();
   }
 
-  private static void separarClasseB(List<Amostra> amostrasClasseB, List<Amostra> conjuntoTreino,
-      List<Amostra> conjuntoValidacao, List<Amostra> conjuntoTeste) {
-    final int METADE_CLASSE_B = amostrasClasseB.size() / 2;
-    final int UM_QUARTO_CLASSE_B = amostrasClasseB.size() / 4;
-    int limiteMaior;
-    int limiteMenor = 0;
-    int numAleatorio;
+  private static int definirMelhorK(List<Amostra> conjuntoTreino, List<Amostra> conjuntoValidacao) {
+    int melhorK = 0, eficienciaK = 0, melhorEficienciaK = -1;
+    double distancia;
+    List<InstanciaProxima> instanciasProximas = new LinkedList<>();
+    String classeEscolhida = "";
 
-    for (int i = 0; i < METADE_CLASSE_B; i++) {
-      limiteMaior = amostrasClasseB.size() - 1;
-      numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
-      Amostra amostraEscolhida = amostrasClasseB.get(numAleatorio);
-      conjuntoTreino.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
-      amostrasClasseB.remove(numAleatorio);
+    for (int kAtual = 1; kAtual <= 19; kAtual += 2) {
+      System.out.println("K atual eh: " + kAtual);
+      for (int i = 0; i < conjuntoValidacao.size(); i++) {
+        for (int j = 0; j < conjuntoTreino.size(); j++) {
+          distancia = Amostra.calcularDistanciaEuclidiana(conjuntoValidacao.get(i), conjuntoTreino.get(j));
+
+          if (instanciasProximas.size() < kAtual) {
+            instanciasProximas.add(new InstanciaProxima(distancia, conjuntoTreino.get(j).classe));
+            Collections.sort(instanciasProximas);
+          } else {
+            // se a distancia da instancia armazenada mais distante for maior que a
+            // distancia ate instancia sendo avaliada
+            if (instanciasProximas.get(0).distancia > distancia) {
+              instanciasProximas.remove(0);
+              instanciasProximas.add(new InstanciaProxima(distancia, conjuntoTreino.get(j).classe));
+              Collections.sort(instanciasProximas);
+            }
+          }
+
+        }
+        classeEscolhida = votoMajoritorio(instanciasProximas);
+        instanciasProximas.clear();
+        // System.out.println("Classe escolhida: " + classeEscolhida);
+        // System.out.println("Classe esperada: " + conjuntoValidacao.get(i).classe);
+        if (classeEscolhida.equals(conjuntoValidacao.get(i).classe)) {
+          eficienciaK++;
+        }
+      }
+      System.out.println("eficiencia K: " + eficienciaK);
+      System.out.println();
+      if (eficienciaK > melhorEficienciaK) {
+        melhorEficienciaK = eficienciaK;
+        melhorK = kAtual;
+      }
+      eficienciaK = 0;
     }
 
-    for (int i = 0; i < UM_QUARTO_CLASSE_B; i++) {
-      limiteMaior = amostrasClasseB.size() - 1;
-      numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
-      Amostra amostraEscolhida = amostrasClasseB.get(numAleatorio);
-      conjuntoValidacao.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
-      amostrasClasseB.remove(numAleatorio);
+    return melhorK;
+  }
+
+  public static String votoMajoritorio(List<InstanciaProxima> instanciasProximas) {
+    int votosParaG = 0, votosParaB = 0;
+
+    for (int i = 0; i < instanciasProximas.size(); i++) {
+      if (instanciasProximas.get(i).classe.equals("b")) {
+        votosParaB++;
+      } else {
+        votosParaG++;
+      }
     }
+    // System.out.println("votos para b: " + votosParaB);
+    // System.out.println("votos para g: " + votosParaG);
 
-    final int RESTANTE = amostrasClasseB.size();
-
-    for (int i = 0; i < RESTANTE; i++) {
-      Amostra amostraEscolhida = amostrasClasseB.get(i);
-      conjuntoTeste.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
+    if (votosParaB > votosParaG) {
+      return "b";
     }
-
-    amostrasClasseB.clear();
+    return "g";
   }
 
 }

@@ -23,4 +23,17 @@ class Amostra {
       }
     }
   }
+
+  public static Double calcularDistanciaEuclidiana(Amostra amostraAtual, Amostra amostraTreino) {
+    double distancia = 0;
+    double distanciaFinal = 0;
+
+    for (int i = 0; i < amostraAtual.parametros.size(); i++) {
+      distancia += Math.pow(amostraAtual.parametros.get(i) - amostraTreino.parametros.get(i), 2);
+    }
+
+    distanciaFinal = Math.sqrt(distancia);
+
+    return distanciaFinal;
+  }
 }
