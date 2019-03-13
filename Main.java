@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public class Main {
   public static void main(String[] args) {
-    final String FILE_PATH = "/home/marco/Desktop/personal_files/Faculdade/4_ano/aprendizado_maquina/trabalho_1/Ionosphere_Marco.csv";
+    final String FILE_PATH = "Ionosphere.csv";
     final int NUM_TESTES = 10;
     double performanceClassificador = 0;
 
@@ -23,6 +23,32 @@ public class Main {
     List<Amostra> amostrasClasseG = new LinkedList<>();
     List<Amostra> amostrasClasseB = new LinkedList<>();
 
+    System.out.println("Escolha o modo de voto a ser usado: ");
+    System.out.println("1 - voto majoritorio");
+    System.out.println("2 - voto ponderado inverso");
+    System.out.println("3 - voto ponderado normalizado");
+
+    String modoVoto = "";
+    Scanner scanner = new Scanner(System.in);
+    modoVoto = scanner.nextLine();
+    scanner.close();
+
+    int melhorK = 0;
+
+    {
+      Amostra.separarPorClasse(amostras, amostrasClasseG, amostrasClasseB);
+
+      List<Amostra> conjuntoTreino = new LinkedList<>();
+      List<Amostra> conjuntoValidacao = new LinkedList<>();
+      List<Amostra> conjuntoTeste = new LinkedList<>();
+
+      separarConjuntos(amostrasClasseG, amostrasClasseB, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
+
+      melhorK = definirMelhorK(conjuntoTreino, conjuntoValidacao, modoVoto);
+    }
+
+    System.out.println("K escolhido: " + melhorK);
+
     for (int i = 0; i < NUM_TESTES; i++) {
       Amostra.separarPorClasse(amostras, amostrasClasseG, amostrasClasseB);
 
@@ -32,9 +58,7 @@ public class Main {
 
       separarConjuntos(amostrasClasseG, amostrasClasseB, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
 
-      int melhorK = definirMelhorK(conjuntoTreino, conjuntoValidacao);
-
-      performanceClassificador += avaliarClassificador(conjuntoTreino, conjuntoTeste, melhorK);
+      performanceClassificador += avaliarClassificador(conjuntoTreino, conjuntoTeste, melhorK, modoVoto);
     }
 
     System.out.println("Performance media do classificador: " + performanceClassificador / 10);
@@ -128,7 +152,7 @@ public class Main {
     amostrasClasse.clear();
   }
 
-  private static int definirMelhorK(List<Amostra> conjuntoTreino, List<Amostra> conjuntoValidacao) {
+  private static int definirMelhorK(List<Amostra> conjuntoTreino, List<Amostra> conjuntoValidacao, String modoVoto) {
     int melhorK = 0, eficienciaK = 0, melhorEficienciaK = -1;
     double distancia;
     List<InstanciaProxima> instanciasProximas = new LinkedList<>();
@@ -153,7 +177,7 @@ public class Main {
           }
 
         }
-        classeEscolhida = escolherModoVoto(instanciasProximas);
+        classeEscolhida = usarModoVoto(instanciasProximas, modoVoto);
 
         instanciasProximas.clear();
 
@@ -171,11 +195,16 @@ public class Main {
     return melhorK;
   }
 
-  private static String escolherModoVoto(List<InstanciaProxima> instanciasProximas) {
+  private static String usarModoVoto(List<InstanciaProxima> instanciasProximas, String modoVoto) {
     String classeEscolhida = "";
-    classeEscolhida = votoMajoritorio(instanciasProximas);
-    // classeEscolhida = votoPonderadoInverso(instanciasProximas);
-    // classeEscolhida = votoPonderadoNormalizado(instanciasProximas);
+
+    if (modoVoto.equals("1")) {
+      classeEscolhida = votoMajoritorio(instanciasProximas);
+    } else if (modoVoto.equals("2")) {
+      classeEscolhida = votoPonderadoInverso(instanciasProximas);
+    } else if (modoVoto.equals("3")) {
+      classeEscolhida = votoPonderadoNormalizado(instanciasProximas);
+    }
 
     return classeEscolhida;
   }
@@ -235,7 +264,8 @@ public class Main {
     return "g";
   }
 
-  private static double avaliarClassificador(List<Amostra> conjuntoTreino, List<Amostra> conjuntoTeste, int melhorK) {
+  private static double avaliarClassificador(List<Amostra> conjuntoTreino, List<Amostra> conjuntoTeste, int melhorK,
+      String modoVoto) {
     double distancia;
     List<InstanciaProxima> instanciasProximas = new LinkedList<>();
     String classeEscolhida = "";
@@ -260,18 +290,15 @@ public class Main {
         }
 
       }
-      classeEscolhida = escolherModoVoto(instanciasProximas);
+      classeEscolhida = usarModoVoto(instanciasProximas, modoVoto);
       instanciasProximas.clear();
       if (classeEscolhida.equals(conjuntoTeste.get(i).classe)) {
         numAcertos++;
       }
     }
-    System.out.println("numero de acertos: " + numAcertos);
-    System.out.println("tamanho do conjunto teste: " + conjuntoTeste.size());
 
     eficienciaClassificador = (numAcertos / (double) conjuntoTeste.size()) * 100;
 
-    System.out.println("retornando eficiencia do classificador: " + eficienciaClassificador);
     return eficienciaClassificador;
   }
 }
