@@ -51,6 +51,7 @@ public class Main {
 
     for (int i = 0; i < NUM_TESTES; i++) {
       Amostra.separarPorClasse(amostras, amostrasClasseG, amostrasClasseB);
+      double performanceClassificadorTemp = 0;
 
       List<Amostra> conjuntoTreino = new LinkedList<>();
       List<Amostra> conjuntoValidacao = new LinkedList<>();
@@ -58,7 +59,11 @@ public class Main {
 
       separarConjuntos(amostrasClasseG, amostrasClasseB, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
 
-      performanceClassificador += avaliarClassificador(conjuntoTreino, conjuntoTeste, melhorK, modoVoto);
+      performanceClassificadorTemp += avaliarClassificador(conjuntoTreino, conjuntoTeste, melhorK, modoVoto);
+
+      performanceClassificador += performanceClassificadorTemp;
+
+      System.out.println("Performance na iteracao " + (i + 1) + ": " + performanceClassificadorTemp);
     }
 
     System.out.println("Performance media do classificador: " + performanceClassificador / 10);
@@ -120,13 +125,13 @@ public class Main {
 
   private static void separarClasse(List<Amostra> amostrasClasse, List<Amostra> conjuntoTreino,
       List<Amostra> conjuntoValidacao, List<Amostra> conjuntoTeste) {
-    final int METADE_CLASSE_G = amostrasClasse.size() / 2;
-    final int UM_QUARTO_CLASSE_G = amostrasClasse.size() / 4;
+    final int METADE_CLASSE = amostrasClasse.size() / 2;
+    final int UM_QUARTO_CLASSE = amostrasClasse.size() / 4;
     int limiteMaior;
     int limiteMenor = 0;
     int numAleatorio;
 
-    for (int i = 0; i < METADE_CLASSE_G; i++) {
+    for (int i = 0; i < METADE_CLASSE; i++) {
       limiteMaior = amostrasClasse.size() - 1;
       numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
       Amostra amostraEscolhida = amostrasClasse.get(numAleatorio);
@@ -134,7 +139,7 @@ public class Main {
       amostrasClasse.remove(numAleatorio);
     }
 
-    for (int i = 0; i < UM_QUARTO_CLASSE_G; i++) {
+    for (int i = 0; i < UM_QUARTO_CLASSE; i++) {
       limiteMaior = amostrasClasse.size() - 1;
       numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
       Amostra amostraEscolhida = amostrasClasse.get(numAleatorio);
