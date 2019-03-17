@@ -19,3 +19,5 @@ No diretório raiz do projeto usar o comando:
 ```bash
   java Main
 ```
+
+Para funcionar a base de dados tem de estar na mesma pasta da classe sendo executada (Main).
