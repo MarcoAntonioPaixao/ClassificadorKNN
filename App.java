@@ -1,6 +1,7 @@
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
 class App {
@@ -22,9 +23,14 @@ class App {
     modoVoto = scanner.nextLine();
     scanner.close();
 
-    int melhorK = 0;
+    int melhorKAtual = 0, melhorK = 0, melhorResultadoParcial = 0;
+    int[] resultadoK = new int[20];
 
-    {
+    for (int i = 0; i < resultadoK.length; i++) {
+      resultadoK[i] = 0;
+    }
+
+    for (int i = 0; i < NUM_TESTES; i++) {
       Amostra.separarPorClasse(amostras, amostrasClasseG, amostrasClasseB);
 
       List<Amostra> conjuntoTreino = new LinkedList<>();
@@ -33,7 +39,15 @@ class App {
 
       separarConjuntos(amostrasClasseG, amostrasClasseB, conjuntoTreino, conjuntoValidacao, conjuntoTeste);
 
-      melhorK = definirMelhorK(conjuntoTreino, conjuntoValidacao, modoVoto);
+      melhorKAtual = definirMelhorK(conjuntoTreino, conjuntoValidacao, modoVoto);
+      resultadoK[melhorKAtual]++;
+    }
+
+    for (int i = 1; i < resultadoK.length; i++) {
+      if (resultadoK[i] > melhorResultadoParcial) {
+        melhorResultadoParcial = resultadoK[i];
+        melhorK = i;
+      }
     }
 
     System.out.println("K escolhido: " + melhorK);
@@ -73,12 +87,16 @@ class App {
     final int METADE_CLASSE = amostrasClasse.size() / 2;
     final int UM_QUARTO_CLASSE = amostrasClasse.size() / 4;
     int limiteMaior;
-    int limiteMenor = 0;
+    // int limiteMenor = 0;
     int numAleatorio;
 
+    Random geradorAleatorio = new Random(System.currentTimeMillis());
+
     for (int i = 0; i < METADE_CLASSE; i++) {
-      limiteMaior = amostrasClasse.size() - 1;
-      numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
+      limiteMaior = amostrasClasse.size();
+      // numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
+      // limite maior eh exclusivo
+      numAleatorio = geradorAleatorio.nextInt(limiteMaior);
       Amostra amostraEscolhida = amostrasClasse.get(numAleatorio);
       conjuntoTreino.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
       amostrasClasse.remove(numAleatorio);
@@ -86,7 +104,8 @@ class App {
 
     for (int i = 0; i < UM_QUARTO_CLASSE; i++) {
       limiteMaior = amostrasClasse.size() - 1;
-      numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
+      // numAleatorio = (int) (Math.random() * limiteMaior) + limiteMenor;
+      numAleatorio = geradorAleatorio.nextInt(limiteMaior);
       Amostra amostraEscolhida = amostrasClasse.get(numAleatorio);
       conjuntoValidacao.add(new Amostra(amostraEscolhida.parametros, amostraEscolhida.classe));
       amostrasClasse.remove(numAleatorio);
